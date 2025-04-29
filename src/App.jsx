@@ -1,131 +1,59 @@
 import { useState } from "react";
-
-const companies = [
-  {
-    id: 1,
-    name: "Züritech AG",
-    categories: ["Jobs", "News", "Products"],
-    posts: [
-      {
-        title: "We're hiring a Frontend Developer!",
-        category: "Jobs",
-        summary: "Join our growing team and help us shape the digital future.",
-      },
-      {
-        title: "Züritech wins 2025 Innovation Award",
-        category: "News",
-        summary: "Our team was recognized for outstanding progress in AI applications.",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "AlpConnect",
-    categories: ["Events", "Social"],
-    posts: [
-      {
-        title: "Meet us at Startup Day Zurich!",
-        category: "Events",
-        summary: "We're showcasing our latest connectivity solution for smart homes.",
-      },
-    ],
-  },
-];
-
-const categories = ["Jobs", "News", "Products", "Events", "Social"];
+import LandingPage from "./components/LandingPage";
+import SelectionPage from "./components/SelectionPage";
+import FeedPage from "./components/FeedPage";
 
 function App() {
-  const [selectedCategories, setSelectedCategories] = useState([]);
-  const [followedCompanies, setFollowedCompanies] = useState([]);
+  const [page, setPage] = useState("landing");
+  const [selections, setSelections] = useState({});
 
-  const toggleCategory = (cat) => {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
+  const handleStart = () => setPage("select");
+  const handleSelectionComplete = (selected) => {
+    setSelections(selected);
+    setPage("feed");
   };
-
-  const toggleCompanyFollow = (id) => {
-    setFollowedCompanies((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    );
+  const handleBackToLanding = () => {
+    setSelections({});
+    setPage("landing");
   };
-
-  const visiblePosts = companies
-    .filter((c) => followedCompanies.includes(c.id))
-    .flatMap((c) =>
-      c.posts.filter((p) => selectedCategories.includes(p.category)).map((p) => ({ ...p, company: c.name }))
-    );
+  const handleBackToSelection = () => {
+    setPage("select");
+  };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "0 auto", padding: "1rem" }}>
-      <h1 style={{ textAlign: "center" }}>CoFilt App Preview</h1>
-      <p style={{ textAlign: "center", fontSize: "14px", marginBottom: "1rem" }}>
-        Choose your interests and follow companies to see personalized updates.
-      </p>
-
-      <h2>Select Categories:</h2>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => toggleCategory(cat)}
-            style={{
-              border: "1px solid gray",
-              padding: "5px 10px",
-              borderRadius: "8px",
-              backgroundColor: selectedCategories.includes(cat) ? "#4CAF50" : "white",
-              color: selectedCategories.includes(cat) ? "white" : "black",
-            }}
-          >
-            {cat}
-          </button>
-        ))}
+    <div
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "2rem",
+      }}
+    >
+      <div
+        style={{
+          width: "390px",
+          height: "844px",
+          border: "16px solid #0B2F5D",
+          borderRadius: "48px",
+          backgroundColor: "#FFFFFF",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+          overflowY: "auto",
+          position: "relative",
+        }}
+      >
+        {page === "landing" && <LandingPage onStart={handleStart} />}
+        {page === "select" && (
+          <SelectionPage
+            onComplete={handleSelectionComplete}
+            onBack={handleBackToLanding}
+          />
+        )}
+        {page === "feed" && (
+          <FeedPage selections={selections} onBack={handleBackToSelection} />
+        )}
       </div>
-
-      <h2>Follow Companies:</h2>
-      <div style={{ marginBottom: "24px" }}>
-        {companies.map((c) => (
-          <div
-            key={c.id}
-            onClick={() => toggleCompanyFollow(c.id)}
-            style={{
-              border: "1px solid gray",
-              borderRadius: "8px",
-              padding: "10px",
-              marginBottom: "8px",
-              backgroundColor: followedCompanies.includes(c.id) ? "#DFF2BF" : "white",
-              cursor: "pointer",
-            }}
-          >
-            {c.name}
-          </div>
-        ))}
-      </div>
-
-      <h2>Your Feed:</h2>
-      {visiblePosts.length === 0 ? (
-        <p>No posts match your selection.</p>
-      ) : (
-        <div>
-          {visiblePosts.map((post, idx) => (
-            <div
-              key={idx}
-              style={{
-                border: "1px solid gray",
-                borderRadius: "8px",
-                padding: "10px",
-                marginBottom: "12px",
-              }}
-            >
-              <h3>{post.title}</h3>
-              <p style={{ fontSize: "12px", color: "gray" }}>
-                {post.company} \u2022 {post.category}
-              </p>
-              <p>{post.summary}</p>
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
