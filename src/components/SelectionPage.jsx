@@ -10,9 +10,13 @@ const companies = [
 
 const categories = ["Jobs", "News", "Events", "Social", "Financial"];
 
-function SelectionPage({ onComplete, onBack }) {
-  const [selectedCompanies, setSelectedCompanies] = useState([]);
-  const [companyCategories, setCompanyCategories] = useState({});
+function SelectionPage({ initialSelections = {}, onComplete, onBack }) {
+  const [selectedCompanies, setSelectedCompanies] = useState(
+    initialSelections.selectedCompanies || []
+  );
+  const [companyCategories, setCompanyCategories] = useState(
+    initialSelections.companyCategories || {}
+  );
 
   const toggleCompany = (companyId) => {
     const isSelected = selectedCompanies.includes(companyId);
