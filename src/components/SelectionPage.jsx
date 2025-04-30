@@ -11,135 +11,171 @@ const companies = [
 const categories = ["Jobs", "News", "Events", "Social", "Financial"];
 
 function SelectionPage({ onComplete, onBack }) {
-  const [selectedCompanyId, setSelectedCompanyId] = useState(companies[0].id);
+  const [selectedCompanies, setSelectedCompanies] = useState([]);
   const [companyCategories, setCompanyCategories] = useState({});
 
-  const toggleCategory = (companyId, category) => {
-    const current = companyCategories[companyId] || [];
-    if (current.includes(category)) {
-      setCompanyCategories({
-        ...companyCategories,
-        [companyId]: current.filter((c) => c !== category),
-      });
-    } else {
-      setCompanyCategories({
-        ...companyCategories,
-        [companyId]: [...current, category],
-      });
+  const toggleCompany = (companyId) => {
+    const isSelected = selectedCompanies.includes(companyId);
+    const updated = isSelected
+      ? selectedCompanies.filter((id) => id !== companyId)
+      : [...selectedCompanies, companyId];
+    setSelectedCompanies(updated);
+
+    if (!isSelected && !companyCategories[companyId]) {
+      setCompanyCategories({ ...companyCategories, [companyId]: [] });
+    }
+    if (isSelected) {
+      const newCats = { ...companyCategories };
+      delete newCats[companyId];
+      setCompanyCategories(newCats);
     }
   };
 
+  const toggleCategory = (companyId, category) => {
+    const current = companyCategories[companyId] || [];
+    const updated = current.includes(category)
+      ? current.filter((c) => c !== category)
+      : [...current, category];
+    setCompanyCategories({ ...companyCategories, [companyId]: updated });
+  };
+
   const handleFinish = () => {
-    const selectedCompanies = Object.keys(companyCategories).map((id) => parseInt(id));
     onComplete({ selectedCompanies, companyCategories });
   };
 
   return (
     <div
       style={{
-        padding: "1rem",
-        borderRadius: "20px",
-        backgroundColor: "#D4E6F9",
+        padding: "2rem 1.5rem",
+        fontFamily: "'Inter', sans-serif",
         color: "#0B2F5D",
+        overflowY: "scroll",
+        scrollbarWidth: "none",
+        msOverflowStyle: "none",
       }}
     >
-      <h2 style={{ textAlign: "center", fontSize: "20px", marginBottom: "1rem" }}>
-        Select a Company
-      </h2>
+      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
 
-      <select
-        value={selectedCompanyId}
-        onChange={(e) => setSelectedCompanyId(parseInt(e.target.value))}
+      <img
+        src="/bot-main.png"
+        alt="CoFilt Bot Main"
         style={{
           width: "100%",
-          padding: "10px",
-          fontSize: "16px",
-          borderRadius: "10px",
-          marginBottom: "1.5rem",
-          border: "1px solid #88B8ED",
+          maxWidth: "240px",
+          margin: "0 auto 1.5rem",
+          display: "block",
         }}
-      >
-        {companies.map((company) => (
-          <option key={company.id} value={company.id}>
-            {company.name}
-          </option>
-        ))}
-      </select>
+      />
 
-      <h3 style={{ fontSize: "16px", marginBottom: "0.5rem" }}>
-        Select Topics for {companies.find((c) => c.id === selectedCompanyId).name}:
-      </h3>
+      <h2 style={{ textAlign: "center", fontSize: "20px", marginBottom: "1.5rem" }}>
+        Company & Topic Selection
+      </h2>
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginBottom: "2rem" }}>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => toggleCategory(selectedCompanyId, cat)}
-            style={{
-              padding: "6px 12px",
-              backgroundColor: (companyCategories[selectedCompanyId] || []).includes(cat)
-                ? "#0B2F5D"
-                : "white",
-              color: (companyCategories[selectedCompanyId] || []).includes(cat)
-                ? "white"
-                : "#0B2F5D",
-              border: "1px solid #0B2F5D",
-              borderRadius: "20px",
-              fontSize: "14px",
-              cursor: "pointer",
-            }}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Company List */}
+      <div style={{ marginBottom: "2rem" }}>
+        {companies.map((company) => {
+          const isSelected = selectedCompanies.includes(company.id);
+          const topics = companyCategories[company.id] || [];
+
+          return (
+            <div
+              key={company.id}
+              style={{
+                border: "1px solid #dce6f5",
+                borderRadius: "10px",
+                marginBottom: "1rem",
+                padding: "1rem",
+                backgroundColor: isSelected ? "#f3f8ff" : "#fff",
+              }}
+            >
+              <label style={{ fontSize: "15px", display: "flex", alignItems: "center" }}>
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleCompany(company.id)}
+                  style={{ marginRight: "10px" }}
+                />
+                {company.name}
+              </label>
+
+              {isSelected && (
+                <div style={{ marginTop: "1rem", paddingLeft: "0.5rem" }}>
+                  <h4 style={{ fontSize: "14px", marginBottom: "0.5rem" }}>
+                    Topics you're interested in:
+                  </h4>
+                  {categories.map((cat) => (
+                    <label
+                      key={cat}
+                      style={{
+                        display: "inline-block",
+                        marginRight: "12px",
+                        marginBottom: "8px",
+                        fontSize: "14px",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={topics.includes(cat)}
+                        onChange={() => toggleCategory(company.id, cat)}
+                        style={{ marginRight: "6px" }}
+                      />
+                      {cat}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      <h3 style={{ fontSize: "16px", marginBottom: "0.5rem" }}>Your Selections:</h3>
-      <div style={{ fontSize: "14px", marginBottom: "1.5rem" }}>
-        {Object.entries(companyCategories).length === 0 ? (
-          <p>No selections yet.</p>
+      {/* Summary */}
+      <h3 style={{ fontSize: "15px", marginBottom: "0.5rem" }}>🧾 Your Selections</h3>
+      <div style={{ fontSize: "14px", marginBottom: "2rem" }}>
+        {selectedCompanies.length === 0 ? (
+          <p style={{ color: "#999" }}>No companies selected yet.</p>
         ) : (
-          Object.entries(companyCategories).map(([companyId, cats]) => (
-            <div key={companyId} style={{ marginBottom: "0.5rem" }}>
-              <strong>{companies.find((c) => c.id === parseInt(companyId)).name}</strong>:{" "}
-              {cats.join(", ") || "(No topics selected)"}
+          selectedCompanies.map((id) => (
+            <div key={id} style={{ marginBottom: "0.5rem" }}>
+              <strong>{companies.find((c) => c.id === id)?.name}</strong>:{" "}
+              {(companyCategories[id] || []).join(", ") || "(No topics selected)"}
             </div>
           ))
         )}
       </div>
 
-      <div style={{ display: "flex", gap: "1rem" }}>
-        <button
-          onClick={onBack}
-          style={{
-            flex: 1,
-            padding: "12px",
-            backgroundColor: "white",
-            color: "#0B2F5D",
-            border: "1px solid #0B2F5D",
-            borderRadius: "12px",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
-          Back
-        </button>
-        <button
-          onClick={handleFinish}
-          style={{
-            flex: 2,
-            padding: "12px",
-            backgroundColor: "#0B2F5D",
-            color: "white",
-            border: "none",
-            borderRadius: "12px",
-            fontSize: "16px",
-            cursor: "pointer",
-          }}
-        >
-          Let's see the News!
-        </button>
-      </div>
+      {/* Main Button */}
+      <button
+        onClick={handleFinish}
+        style={{
+          width: "100%",
+          padding: "12px",
+          backgroundColor: "#0B2F5D",
+          color: "#fff",
+          border: "none",
+          borderRadius: "12px",
+          fontSize: "16px",
+          fontWeight: "600",
+          cursor: "pointer",
+        }}
+      >
+        Let’s see the News!
+      </button>
+
+      {/* Back text link */}
+      <p
+        onClick={onBack}
+        style={{
+          textAlign: "center",
+          marginTop: "1rem",
+          fontSize: "13px",
+          color: "#888",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
+      >
+        Back
+      </p>
     </div>
   );
 }

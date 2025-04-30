@@ -2,6 +2,12 @@ import { useState } from "react";
 import LandingPage from "./components/LandingPage";
 import SelectionPage from "./components/SelectionPage";
 import FeedPage from "./components/FeedPage";
+import PageDocs from "./components/PageDocs";
+
+const devMode = true; // Set to false when you're done
+
+// Capitalize page string and append "Page"
+const capitalizePage = (name) => name.charAt(0).toUpperCase() + name.slice(1) + "Page";
 
 function App() {
   const [page, setPage] = useState("landing");
@@ -20,21 +26,34 @@ function App() {
     setPage("select");
   };
 
-  return (
+return (
+  <div
+    style={{
+      minHeight: "100vh",
+      backgroundColor: "#000",
+      padding: "2rem",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    {/* Centered container with fixed width for layout */}
     <div
       style={{
-        minHeight: "100vh",
-        backgroundColor: "#000",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        padding: "2rem",
+        alignItems: "flex-start",
+        gap: "2rem",
+        maxWidth: "calc(390px + 280px + 2rem)", // phone + sidebar + spacing
+        width: "100%",
       }}
     >
+      {/* Phone UI */}
       <div
         style={{
-          width: "390px",
-          height: "844px",
+          width: "600px",
+          height: "720px",
+         
           border: "16px solid #0B2F5D",
           borderRadius: "48px",
           backgroundColor: "#FFFFFF",
@@ -54,8 +73,14 @@ function App() {
           <FeedPage selections={selections} onBack={handleBackToSelection} />
         )}
       </div>
+
+      {/* Info Sidebar */}
+      {devMode && <PageDocs page={page === "select" ? "SelectionPage" : capitalizePage(page)} />}
+
     </div>
-  );
+  </div>
+);
+
 }
 
 export default App;
